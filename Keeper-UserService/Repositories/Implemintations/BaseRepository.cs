@@ -29,6 +29,7 @@ namespace Keeper_UserService.Repositories.Implemintations
         public async Task<T> CreateAsync(T obj)
         {
             await _appDbContext.Set<T>().AddAsync(obj);
+            await _appDbContext.SaveChangesAsync();
             return obj;
         }
 

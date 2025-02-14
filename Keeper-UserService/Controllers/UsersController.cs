@@ -83,7 +83,7 @@ namespace Keeper_UserService.Controllers
                 if (!userServiceResponse.IsSuccess)
                     return StatusCode(statusCode: userServiceResponse.Status, new { message = userServiceResponse });
 
-                return StatusCode(statusCode: 201, userServiceResponse);
+                return StatusCode(statusCode: 201, new { data = userServiceResponse.Data, message = "User was created." });
             }
             catch (Exception ex)
             {
