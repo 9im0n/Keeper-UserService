@@ -30,11 +30,13 @@ namespace Keeper_UserService
 
             builder.Services.AddScoped<IRolesRepository, RolesRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IActivationPasswordsRepository, ActivationPasswordsRepository>();
 
             // Services
 
             builder.Services.AddScoped<IRolesService, RolesService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IActivationPasswordService, ActivationPasswordsService>();
 
 
             var app = builder.Build();

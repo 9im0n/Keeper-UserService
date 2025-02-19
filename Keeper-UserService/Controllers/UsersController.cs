@@ -26,7 +26,7 @@ namespace Keeper_UserService.Controllers
                 if (!response.IsSuccess)
                     return StatusCode(statusCode: response.Status, new { message = response.Message });
 
-                return Ok(response);
+                return Ok(new { data = response.Data, message = response.Message });
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace Keeper_UserService.Controllers
                 if (!response.IsSuccess)
                     return StatusCode(statusCode: response.Status, new { message = response.Message });
 
-                return Ok(response);
+                return Ok(new { data = response.Data, message = response.Message });
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace Keeper_UserService.Controllers
                 if (!response.IsSuccess)
                     return StatusCode(statusCode: response.Status, new { message = response.Message });
 
-                return Ok(response);
+                return Ok(new { data = response.Data, message = response.Message });
             }
             catch (Exception ex)
             {
@@ -81,13 +81,13 @@ namespace Keeper_UserService.Controllers
                 ServiceResponse<Users> userServiceResponse = await _userService.CreateAsync(newUser);
 
                 if (!userServiceResponse.IsSuccess)
-                    return StatusCode(statusCode: userServiceResponse.Status, new { message = userServiceResponse });
+                    return StatusCode(statusCode: userServiceResponse.Status, new { message = userServiceResponse.Message });
 
                 return StatusCode(statusCode: 201, new { data = userServiceResponse.Data, message = "User was created." });
             }
             catch (Exception ex)
             {
-                return Problem(statusCode: 500, detail: ex.Message);
+                return Problem(statusCode: 500, detail: $"User service: {ex.Message}");
             }
         }
     }

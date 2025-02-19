@@ -10,6 +10,7 @@ namespace Keeper_UserService.Db
         public DbSet<Profiles> Profiles { get; set; }
         public DbSet<Roles> Roles { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<ActivationPasswords> ActivationPasswords { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
     }

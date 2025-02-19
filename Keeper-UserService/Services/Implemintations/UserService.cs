@@ -10,12 +10,15 @@ namespace Keeper_UserService.Services.Implemintations
     {
         private readonly IUserRepository _userRepository;
         private readonly IRolesService _rolesService;
+        private readonly IActivationPasswordService _activationPasswordService;
 
 
-        public UserService(IUserRepository userRepository, IRolesService rolesService)
+        public UserService(IUserRepository userRepository, IRolesService rolesService, 
+            IActivationPasswordService activationPasswordService)
         {
             _userRepository = userRepository;
             _rolesService = rolesService;
+            _activationPasswordService = activationPasswordService;
         }
 
 
@@ -70,6 +73,11 @@ namespace Keeper_UserService.Services.Implemintations
             };
 
             Users User = await _userRepository.CreateAsync(user);
+
+            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(user);
+
+            // TODO: Отправка пароля на email
+
             return ServiceResponse<Users>.Success(User, 201);
         }
     }
