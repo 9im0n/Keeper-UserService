@@ -4,21 +4,23 @@ using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
 
-namespace Keeper_UserService.Services.Implemintations
+namespace Keeper_UserService.Services.Implementations
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRolesService _rolesService;
         private readonly IActivationPasswordService _activationPasswordService;
+        private readonly IEmailService _emailService;
 
 
         public UserService(IUserRepository userRepository, IRolesService rolesService, 
-            IActivationPasswordService activationPasswordService)
+            IActivationPasswordService activationPasswordService, IEmailService emailService)
         {
             _userRepository = userRepository;
             _rolesService = rolesService;
             _activationPasswordService = activationPasswordService;
+            _emailService = emailService;
         }
 
 
@@ -54,10 +56,13 @@ namespace Keeper_UserService.Services.Implemintations
 
         public async Task<ServiceResponse<Users?>> CreateAsync(CreateUserDTO newUser)
         {
+            if (newUser.Password != newUser.Confirm)
+                return ServiceResponse<Users>.Fail(default, 400, "Password and Confirm password aren't same");
+
             Users oldUser = await _userRepository.GetByEmailAsync(newUser.Email);
 
             if (oldUser != null)
-                return ServiceResponse<Users>.Fail(null, 409, "User with this email is already exists.");
+                return ServiceResponse<Users>.Fail(default, 409, "User with this email is already exists.");
 
             var role = await _rolesService.GetByNameAsync("User");
 
@@ -74,11 +79,36 @@ namespace Keeper_UserService.Services.Implemintations
 
             Users User = await _userRepository.CreateAsync(user);
 
-            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(user);
+            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(User);
 
-            // TODO: Отправка пароля на email
+            ServiceResponse<string> response = await _emailService.SendWelcomeEmailAsync(User.Email, password.Data);
+
+            if (!response.IsSuccess)
+                return ServiceResponse<Users>.Fail(default, response.Status, response.Message);
 
             return ServiceResponse<Users>.Success(User, 201);
+        }
+
+
+        public async Task<ServiceResponse<Users?>> ActivateUser(UserActivationDTO activation)
+        {
+            Users? user = await _userRepository.GetByEmailAsync(activation.Email);
+
+            if (user == null)
+                return ServiceResponse<Users?>.Fail(default, 404, "User doesn't exist with this email.");
+
+            ServiceResponse<ActivationPasswords?> password = await _activationPasswordService.GetByUserIdAsync(user.Id);
+
+            if (!password.IsSuccess)
+                return ServiceResponse<Users?>.Fail(default, 404, "Activation password doesn't exist.");
+
+            if (password.Data.Password != activation.ActivationPassword)
+                return ServiceResponse<Users?>.Fail(default, 400, "Activation passwords are not same.");
+
+            user.IsActive = true;
+            user = await _userRepository.UpdateAsync(user);
+
+            return ServiceResponse<Users?>.Success(user);
         }
     }
 }

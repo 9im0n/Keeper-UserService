@@ -3,7 +3,7 @@ using Keeper_UserService.Models.Db;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
 
-namespace Keeper_UserService.Services.Implemintations
+namespace Keeper_UserService.Services.Implementations
 {
     public class ActivationPasswordsService : IActivationPasswordService
     {

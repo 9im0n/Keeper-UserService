@@ -90,5 +90,24 @@ namespace Keeper_UserService.Controllers
                 return Problem(statusCode: 500, detail: $"User service: {ex.Message}");
             }
         }
+
+
+        [HttpPost("activate")]
+        public async Task<IActionResult> UserActivation([FromBody] UserActivationDTO activation)
+        {
+            try
+            {
+                ServiceResponse<Users?> response = await _userService.ActivateUser(activation);
+
+                if (!response.IsSuccess)
+                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
+
+                return Ok(new { data = response.Data, message = response.Message });
+            }
+            catch (Exception ex)
+            {
+                return Problem(statusCode: 500, detail: $"User Service: {ex.Message}");
+            }
+        }
     }
 }

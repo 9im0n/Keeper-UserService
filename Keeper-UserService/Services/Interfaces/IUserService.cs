@@ -10,5 +10,6 @@ namespace Keeper_UserService.Services.Interfaces
         public Task<ServiceResponse<Users?>> GetByIdAsync(Guid id);
         public Task<ServiceResponse<Users?>> GetByEmailAsync(string email);
         public Task<ServiceResponse<Users?>> CreateAsync(CreateUserDTO newUser);
+        public Task<ServiceResponse<Users?>> ActivateUser(UserActivationDTO activation);
     }
 }
