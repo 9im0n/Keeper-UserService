@@ -3,7 +3,7 @@ using Keeper_UserService.Models.Db;
 using Keeper_UserService.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Keeper_UserService.Repositories.Implemintations
+namespace Keeper_UserService.Repositories.Implementations
 {
     public class RolesRepository : BaseRepository<Roles>, IRolesRepository
     {
