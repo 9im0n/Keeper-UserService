@@ -1,5 +1,5 @@
 using Keeper_UserService.Db;
-using Keeper_UserService.Repositories.Implemintations;
+using Keeper_UserService.Repositories.Implementations;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Implementations;
 using Keeper_UserService.Services.Interfaces;
@@ -28,13 +28,11 @@ namespace Keeper_UserService
             builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
 
             // Repos
-
             builder.Services.AddScoped<IRolesRepository, RolesRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IActivationPasswordsRepository, ActivationPasswordsRepository>();
 
             // Services
-
             builder.Services.AddScoped<IRolesService, RolesService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IActivationPasswordService, ActivationPasswordsService>();

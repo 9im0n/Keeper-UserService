@@ -3,11 +3,11 @@ using Keeper_UserService.Models.Db;
 using Keeper_UserService.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Keeper_UserService.Repositories.Implemintations
+namespace Keeper_UserService.Repositories.Implementations
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : BaseModel
     {
-        protected AppDbContext _appDbContext;
+        protected readonly AppDbContext _appDbContext;
 
         public BaseRepository(AppDbContext appDbContext)
         {

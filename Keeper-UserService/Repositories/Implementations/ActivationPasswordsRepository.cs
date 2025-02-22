@@ -4,7 +4,7 @@ using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Keeper_UserService.Repositories.Implemintations
+namespace Keeper_UserService.Repositories.Implementations
 {
     public class ActivationPasswordsRepository : BaseRepository<ActivationPasswords>, IActivationPasswordsRepository
     {
