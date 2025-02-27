@@ -108,7 +108,7 @@ namespace Keeper_UserService.Services.Implementations
             user.IsActive = true;
             user = await _userRepository.UpdateAsync(user);
 
-            return ServiceResponse<Users?>.Success(user);
+            return ServiceResponse<Users?>.Success(user, 201, "The user has been activated.");
         }
     }
 }

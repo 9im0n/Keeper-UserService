@@ -16,6 +16,7 @@ namespace Keeper_UserService.Controllers
             _userService = userService;
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -24,7 +25,7 @@ namespace Keeper_UserService.Controllers
                 ServiceResponse<List<Users>> response = await _userService.GetAllAsync();
 
                 if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
+                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
                 return Ok(new { data = response.Data, message = response.Message });
             }
@@ -43,7 +44,7 @@ namespace Keeper_UserService.Controllers
                 ServiceResponse<Users> response = await _userService.GetByIdAsync(id);
 
                 if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
+                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
                 return Ok(new { data = response.Data, message = response.Message });
             }
@@ -62,7 +63,7 @@ namespace Keeper_UserService.Controllers
                 ServiceResponse<Users> response = await _userService.GetByEmailAsync(email);
 
                 if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
+                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
                 return Ok(new { data = response.Data, message = response.Message });
             }
@@ -76,14 +77,17 @@ namespace Keeper_UserService.Controllers
         [HttpPost("registration")]
         public async Task<IActionResult> Registration([FromBody] CreateUserDTO newUser)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
-                ServiceResponse<Users> userServiceResponse = await _userService.CreateAsync(newUser);
+                ServiceResponse<Users> response = await _userService.CreateAsync(newUser);
 
-                if (!userServiceResponse.IsSuccess)
-                    return StatusCode(statusCode: userServiceResponse.Status, new { message = userServiceResponse.Message });
+                if (!response.IsSuccess)
+                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
-                return StatusCode(statusCode: 201, new { data = userServiceResponse.Data, message = "User was created." });
+                return StatusCode(statusCode: 201, new { data = response.Data, message = "User was created." });
             }
             catch (Exception ex)
             {
@@ -95,6 +99,9 @@ namespace Keeper_UserService.Controllers
         [HttpPost("activate")]
         public async Task<IActionResult> UserActivation([FromBody] UserActivationDTO activation)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 ServiceResponse<Users?> response = await _userService.ActivateUser(activation);
