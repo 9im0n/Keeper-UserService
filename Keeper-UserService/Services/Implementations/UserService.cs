@@ -45,7 +45,7 @@ namespace Keeper_UserService.Services.Implementations
 
         public async Task<ServiceResponse<Users?>> GetByEmailAsync(string email)
         {
-            Users user = await _userRepository.GetByEmailAsync(email);
+            Users? user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null)
                 return ServiceResponse<Users>.Fail(null, 404, "User with this email doesn't exist");

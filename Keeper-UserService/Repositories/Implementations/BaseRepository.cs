@@ -14,13 +14,13 @@ namespace Keeper_UserService.Repositories.Implementations
             _appDbContext = appDbContext;
         }
 
-        public async Task<List<T>> GetAllAsync()
+        public virtual async Task<List<T>> GetAllAsync()
         {
             return await _appDbContext.Set<T>().ToListAsync();
         }
 
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public virtual async Task<T?> GetByIdAsync(Guid id)
         {
             return await _appDbContext.Set<T>().FirstOrDefaultAsync(obj => obj.Id == id);
         }
@@ -34,9 +34,9 @@ namespace Keeper_UserService.Repositories.Implementations
         }
 
 
-        public async Task<T> UpdateAsync(T obj)
+        public async Task<T?> UpdateAsync(T obj)
         {
-            T oldObj = await _appDbContext.Set<T>().FirstOrDefaultAsync(obj => obj.Id == obj.Id);
+            T? oldObj = await _appDbContext.Set<T>().FirstOrDefaultAsync(obj => obj.Id == obj.Id);
 
             if (oldObj == null)
                 return null;
@@ -48,9 +48,13 @@ namespace Keeper_UserService.Repositories.Implementations
         }
 
 
-        public async Task<T> DeleteAsync(Guid id)
+        public async Task<T?> DeleteAsync(Guid id)
         {
-            T obj = await _appDbContext.Set<T>().FirstOrDefaultAsync(obj => obj.Id == id);
+            T? obj = await _appDbContext.Set<T>().FirstOrDefaultAsync(obj => obj.Id == id);
+
+            if (obj == null) 
+                return null;
+
             _appDbContext.Remove(obj);
 
             await _appDbContext.SaveChangesAsync();
