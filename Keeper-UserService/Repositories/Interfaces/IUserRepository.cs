@@ -4,6 +4,6 @@ namespace Keeper_UserService.Repositories.Interfaces
 {
     public interface IUserRepository : IBaseRepository<Users>
     {
-        public Task<Users> GetByEmailAsync(string email);
+        public Task<Users?> GetByEmailAsync(string email);
     }
 }
