@@ -11,19 +11,20 @@ namespace Keeper_UserService.Repositories.Implementations
 
         public override async Task<List<Users>> GetAllAsync()
         {
-            return await _appDbContext.Users.Include(u => u.Role).Include(u => u.Permissions).ToListAsync();
+            return await _appDbContext.Users.Include(u => u.Role).Include(u => u.Permissions)
+                .Include(u => u.Profile).ToListAsync();
         }
 
         public override async Task<Users?> GetByIdAsync(Guid Id)
         {
-            return await _appDbContext.Users.Include(u => u.Role)
-                .Include(u => u.Permissions).FirstOrDefaultAsync(u => u.Id == Id);
+            return await _appDbContext.Users.Include(u => u.Role).Include(u => u.Permissions)
+                .Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == Id);
         }
 
         public async Task<Users?> GetByEmailAsync(string email)
         {
-            return await _appDbContext.Users.Include(u => u.Role)
-                .Include(u => u.Permissions).FirstOrDefaultAsync(x => x.Email == email);
+            return await _appDbContext.Users.Include(u => u.Role).Include(u => u.Permissions)
+                .Include(u => u.Profile).FirstOrDefaultAsync(x => x.Email == email);
         }
     }
 }
