@@ -17,8 +17,9 @@ namespace Keeper_UserService.Models.Db
         public required Guid RoleId { get; set; }
         public virtual Roles Role { get; set; }
 
-        public virtual ICollection<Permissions> Permissions { get; set; } = new List<Permissions>();
+        public virtual Profiles Profile { get; set; } = null!;
 
+        public virtual ICollection<Permissions> Permissions { get; set; } = new List<Permissions>();
 
         public IEnumerable<Permissions> GetPermissions() => Role.Permissions.Union(Permissions);
     }

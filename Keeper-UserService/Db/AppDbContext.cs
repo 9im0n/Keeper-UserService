@@ -1,5 +1,6 @@
 ﻿using Keeper_UserService.Models.Db;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Keeper_UserService.Db
 {
@@ -13,5 +14,15 @@ namespace Keeper_UserService.Db
         public DbSet<ActivationPasswords> ActivationPasswords { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Users>()
+                .HasOne(u => u.Profile)
+                .WithOne()
+                .HasForeignKey<Profiles>(p => p.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

@@ -3,6 +3,7 @@ using Keeper_UserService.Models.Db;
 using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
+using BCrypt.Net;
 
 namespace Keeper_UserService.Services.Implementations
 {
@@ -12,15 +13,20 @@ namespace Keeper_UserService.Services.Implementations
         private readonly IRolesService _rolesService;
         private readonly IActivationPasswordService _activationPasswordService;
         private readonly IEmailService _emailService;
+        private readonly IProfileService _profileService;
 
 
-        public UserService(IUserRepository userRepository, IRolesService rolesService, 
-            IActivationPasswordService activationPasswordService, IEmailService emailService)
+        public UserService(IUserRepository userRepository, 
+                           IRolesService rolesService, 
+                           IActivationPasswordService activationPasswordService, 
+                           IEmailService emailService,
+                           IProfileService profileService)
         {
             _userRepository = userRepository;
             _rolesService = rolesService;
             _activationPasswordService = activationPasswordService;
             _emailService = emailService;
+            _profileService = profileService;
         }
 
 
@@ -64,13 +70,14 @@ namespace Keeper_UserService.Services.Implementations
             if (oldUser != null)
                 return ServiceResponse<Users>.Fail(default, 409, "User with this email is already exists.");
 
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password, workFactor: 12);
             var role = await _rolesService.GetByNameAsync("User");
 
             Users user = new Users()
             {
                 Id = Guid.NewGuid(),
                 Email = newUser.Email,
-                Password = newUser.Password,
+                Password = hashedPassword,
                 IsActive = false,
                 RoleId = role.Id,
                 Role = role,
@@ -79,8 +86,13 @@ namespace Keeper_UserService.Services.Implementations
 
             Users User = await _userRepository.CreateAsync(user);
 
-            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(User);
+            CreateProfileDTO createProfileDTO = new CreateProfileDTO { UserId = User.Id };
+            ServiceResponse<Profiles?> profile = await _profileService.CreateAsync(createProfileDTO);
 
+            if (!profile.IsSuccess)
+                return ServiceResponse<Users>.Fail(default, profile.Status, profile.Message);
+
+            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(User);
             ServiceResponse<string> response = await _emailService.SendWelcomeEmailAsync(User.Email, password.Data);
 
             if (!response.IsSuccess)
