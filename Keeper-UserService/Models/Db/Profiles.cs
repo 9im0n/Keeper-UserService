@@ -18,13 +18,4 @@ public class Profiles : BaseModel
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid UserId { get; set; }
-
-    [JsonIgnore]
-    public virtual Users User { get; set; }
-
-
-    public bool IsValidAvatarUrl()
-    {
-        return Uri.TryCreate(AvatarUrl, UriKind.Absolute, out _);
-    }
 }
