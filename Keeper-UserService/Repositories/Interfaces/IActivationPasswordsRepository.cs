@@ -4,6 +4,6 @@ namespace Keeper_UserService.Repositories.Interfaces
 {
     public interface IActivationPasswordsRepository : IBaseRepository<ActivationPasswords>
     {
-        public Task<ActivationPasswords?> GetByUserIdAsync(Guid Id);
+        public Task<ActivationPasswords?> GetByEmailAsync(string email);
     }
 }

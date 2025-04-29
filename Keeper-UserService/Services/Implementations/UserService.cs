@@ -63,12 +63,18 @@ namespace Keeper_UserService.Services.Implementations
         public async Task<ServiceResponse<Users?>> CreateAsync(CreateUserDTO newUser)
         {
             if (newUser.Password != newUser.Confirm)
-                return ServiceResponse<Users>.Fail(default, 400, "Password and Confirm password aren't same");
+                return ServiceResponse<Users>.Fail(default, 400, "Password and Confirm password don't mutch.");
 
             Users oldUser = await _userRepository.GetByEmailAsync(newUser.Email);
 
             if (oldUser != null)
                 return ServiceResponse<Users>.Fail(default, 409, "User with this email is already exists.");
+
+            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(newUser.Email);
+            ServiceResponse<string> response = await _emailService.SendWelcomeEmailAsync(newUser.Email, password.Data);
+
+            if (!response.IsSuccess)
+                return ServiceResponse<Users>.Fail(default, response.Status, response.Message);
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password, workFactor: 12);
             var role = await _rolesService.GetByNameAsync("User");
@@ -92,12 +98,6 @@ namespace Keeper_UserService.Services.Implementations
             if (!profile.IsSuccess)
                 return ServiceResponse<Users>.Fail(default, profile.Status, profile.Message);
 
-            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(User);
-            ServiceResponse<string> response = await _emailService.SendWelcomeEmailAsync(User.Email, password.Data);
-
-            if (!response.IsSuccess)
-                return ServiceResponse<Users>.Fail(default, response.Status, response.Message);
-
             return ServiceResponse<Users>.Success(User, 201);
         }
 
@@ -109,7 +109,7 @@ namespace Keeper_UserService.Services.Implementations
             if (user == null)
                 return ServiceResponse<Users?>.Fail(default, 404, "User doesn't exist with this email.");
 
-            ServiceResponse<ActivationPasswords?> password = await _activationPasswordService.GetByUserIdAsync(user.Id);
+            ServiceResponse<ActivationPasswords?> password = await _activationPasswordService.GetByEmailAsync(user.Email);
 
             if (!password.IsSuccess)
                 return ServiceResponse<Users?>.Fail(default, 404, "Activation password doesn't exist.");

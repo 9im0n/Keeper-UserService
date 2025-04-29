@@ -11,9 +11,9 @@ namespace Keeper_UserService.Repositories.Implementations
         public ActivationPasswordsRepository(AppDbContext context): base(context) { }
 
 
-        public async Task<ActivationPasswords?> GetByUserIdAsync(Guid Id)
+        public async Task<ActivationPasswords?> GetByEmailAsync(string email)
         {
-            return await _appDbContext.ActivationPasswords.FirstOrDefaultAsync(p => p.UserId == Id);
+            return await _appDbContext.ActivationPasswords.FirstOrDefaultAsync(p => p.Email == email);
         }
     }
 }
