@@ -91,7 +91,7 @@ namespace Keeper_UserService.Controllers
             }
             catch (Exception ex)
             {
-                return Problem(statusCode: 500, detail: $"User service: {ex.Message}");
+                return Problem(statusCode: 500, detail: $"User service: {ex.Message} {ex.StackTrace}");
             }
         }
 

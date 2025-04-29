@@ -6,11 +6,7 @@ namespace Keeper_UserService.Models.Db
     public class ActivationPasswords : BaseModel
     {
         [Required]
-        public required Guid UserId { get; set; }
-
-        [Required]
-        [JsonIgnore]
-        public virtual Users User { get; set; }
+        public string Email { get; set; }
 
         [Required]
         public required string Password { get; set; }
