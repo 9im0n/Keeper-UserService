@@ -14,18 +14,18 @@ namespace Keeper_UserService.Services.Implementations
             _repository = repository;
         }
 
-        public async Task<ServiceResponse<ActivationPasswords?>> GetByUserIdAsync(Guid id)
+        public async Task<ServiceResponse<ActivationPasswords?>> GetByEmailAsync(string email)
         {
-            ActivationPasswords password = await _repository.GetByUserIdAsync(id);
+            ActivationPasswords? password = await _repository.GetByEmailAsync(email);
 
             if (password == null)
-                return ServiceResponse<ActivationPasswords>.Fail(default, 404, $"There is no password with user id: {id}");
+                return ServiceResponse<ActivationPasswords>.Fail(default, 404, $"There is no password for {email}.");
         
-            return ServiceResponse<ActivationPasswords>.Success(password);
+            return ServiceResponse<ActivationPasswords?>.Success(password);
         }
 
 
-        public async Task<ServiceResponse<ActivationPasswords?>> CreateAsync(Users user)
+        public async Task<ServiceResponse<ActivationPasswords>> CreateAsync(string email)
         {
             string newPassword = "";
             Random rnd = new Random();
@@ -35,23 +35,24 @@ namespace Keeper_UserService.Services.Implementations
                 newPassword += rnd.Next(0, 10).ToString();
             }
 
-            ActivationPasswords password = await _repository.GetByUserIdAsync(user.Id);
+            ActivationPasswords? password = await _repository.GetByEmailAsync(email);
 
             if (password != null)
             {
                 password = await _repository.UpdateAsync(new ActivationPasswords()
                 {
-                    UserId = user.Id,
-                    User = user,
+                    Id = password.Id,
+                    Email = email,
                     Password = newPassword,
                     CreatedAt = DateTime.UtcNow
                 });
+
+                return ServiceResponse<ActivationPasswords>.Success(password);
             }
 
             password = await _repository.CreateAsync(new ActivationPasswords()
             {
-                UserId = user.Id,
-                User = user,
+                Email = email,
                 Password = newPassword,
                 CreatedAt = DateTime.UtcNow
             });
