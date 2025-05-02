@@ -1,4 +1,6 @@
-﻿using Keeper_UserService.Models.Db;
+﻿using Keeper_ApiGateWay.Models.Services;
+using Keeper_UserService.Models.Db;
+using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
 
@@ -14,34 +16,48 @@ namespace Keeper_UserService.Services.Implementations
             _rolesRepository = rolesRepository;
         }
 
-
-        public async Task<Roles?> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<List<RoleDTO>>> GetAllRolesAsync()
         {
-            return await _rolesRepository.GetByIdAsync(id);
+            List<Role> roles = await _rolesRepository.GetAllAsync();
+            return ServiceResponse<List<RoleDTO>>.Success(
+                roles.Select(r => new RoleDTO { Id = r.Id, Name = r.Name }).ToList()
+            );
         }
 
-
-        public Task<Roles?> GetByNameAsync(string name)
+        public async Task<ServiceResponse<RoleDTO?>> GetByIdAsync(Guid id)
         {
-            return _rolesRepository.GetByNameAsync(name);
+            Role? role = await _rolesRepository.GetByIdAsync(id);
+
+            if (role == null)
+                return ServiceResponse<RoleDTO?>.Fail(default, 404, "Role doesn't exist.");
+
+            RoleDTO roleDTO = new RoleDTO()
+            {
+                Id = role.Id,
+                Name = role.Name,
+            };
+
+            return ServiceResponse<RoleDTO?>.Success(roleDTO);
         }
 
-
-        public async Task<Roles> CreateAsync(Roles role)
+        private async Task<ServiceResponse<RoleDTO?>> GetByNameAsync(string name)
         {
-            return await _rolesRepository.CreateAsync(role);
+            Role? role = await _rolesRepository.GetByNameAsync(name);
+
+            if (role == null)
+                return ServiceResponse<RoleDTO?>.Fail(default, 404, "Role doesn't exist.");
+
+            RoleDTO roleDTO = new RoleDTO()
+            {
+                Id = role.Id,
+                Name = role.Name,
+            };
+
+            return ServiceResponse<RoleDTO?>.Success(roleDTO);
         }
 
-
-        public async Task<Roles> UpdateAsync(Roles role)
-        {
-            return await _rolesRepository.UpdateAsync(role);
-        }
-
-
-        public async Task<Roles> DeleteAsync(Guid id)
-        {
-            return await _rolesRepository.DeleteAsync(id);
-        }
+        public async Task<ServiceResponse<RoleDTO?>> GetUserRoleAsync() => await GetByNameAsync("user");
+        public async Task<ServiceResponse<RoleDTO?>> GetModerRoleAsync() => await GetByNameAsync("moder");
+        public async Task<ServiceResponse<RoleDTO?>> GetAdminRoleAsync() => await GetByNameAsync("admin");
     }
 }

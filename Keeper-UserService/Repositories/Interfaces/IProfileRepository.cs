@@ -1,7 +1,10 @@
-﻿namespace Keeper_UserService.Repositories.Interfaces
+﻿using Keeper_UserService.Models.Db;
+using Keeper_UserService.Models.DTO;
+
+namespace Keeper_UserService.Repositories.Interfaces
 {
-    public interface IProfileRepository : IBaseRepository<Profiles>
+    public interface IProfileRepository : IBaseRepository<Profile>
     {
-        public Task<Profiles?> GetByUserIdAsync(Guid userId);
+        public Task<PagedResultDTO<ProfileDTO>> GetPagedProfilesAsync(PagedRequestDTO<ProfileFilterDTO> request);
     }
 }

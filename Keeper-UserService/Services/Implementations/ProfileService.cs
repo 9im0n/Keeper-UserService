@@ -1,4 +1,5 @@
 ﻿using Keeper_ApiGateWay.Models.Services;
+using Keeper_UserService.Models.Db;
 using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
@@ -8,81 +9,80 @@ namespace Keeper_UserService.Services.Implementations
     public class ProfileService: IProfileService
     {
         private readonly IProfileRepository _profileRepository;
+        private readonly IDTOMapper _mapper;
 
-        public ProfileService(IProfileRepository profileRepository)
+        public ProfileService(IProfileRepository profileRepository, IDTOMapper mapper)
         {
             _profileRepository = profileRepository;
+            _mapper = mapper;
         }
 
-
-        public async Task<ServiceResponse<Profiles?>> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<PagedResultDTO<ProfileDTO>>> GetProfilesPagedAsync
+            (PagedRequestDTO<ProfileFilterDTO> pagedRequestDTO)
         {
-            Profiles? profile = await _profileRepository.GetByIdAsync(id);
+            PagedResultDTO<ProfileDTO> result = await _profileRepository.GetPagedProfilesAsync(pagedRequestDTO);
+            return ServiceResponse<PagedResultDTO<ProfileDTO>>.Success(result);
+        }
+
+        public async Task<ServiceResponse<ProfileDTO?>> GetByIdAsync(Guid id)
+        {
+            Profile? profile = await _profileRepository.GetByIdAsync(id);
 
             if (profile == null)
-                return ServiceResponse<Profiles?>.Fail(default, 404, "Profile doesn't exist.");
+                return ServiceResponse<ProfileDTO?>.Fail(default, 404, "Profile doesn't exist.");
 
-            return ServiceResponse<Profiles?>.Success(profile);
+            ProfileDTO profileDTO = _mapper.Map(profile);
+
+            return ServiceResponse<ProfileDTO?>.Success(profileDTO);
         }
 
-        public async Task<ServiceResponse<Profiles?>> GetByUserIdAsync(Guid id)
+        public async Task<ServiceResponse<ProfileDTO?>> CreateAsync(CreateProfileDTO createProfileDTO)
         {
-            Profiles? profile = await _profileRepository.GetByUserIdAsync(id);
-
-            if (profile == null)
-                return ServiceResponse<Profiles?>.Fail(default, 404, "Profile doesn't exist.");
-
-            return ServiceResponse<Profiles?>.Success(profile);
-        }
-
-        public async Task<ServiceResponse<Profiles?>> CreateAsync(CreateProfileDTO createProfileDTO)
-        {
-            Profiles? oldProfile = await _profileRepository.GetByUserIdAsync(createProfileDTO.UserId);
+            Profile? oldProfile = await _profileRepository.GetByIdAsync(createProfileDTO.Id);
 
             if (oldProfile != null)
-                return ServiceResponse<Profiles?>.Fail(default, 409, "Profile already exists.");
+                return ServiceResponse<ProfileDTO?>.Fail(default, 409, "Profile already exists.");
 
-            Profiles newProfile = new Profiles
+            Profile newProfile = new Profile
             {
                 Name = createProfileDTO.Name,
                 Description = createProfileDTO.Description,
                 AvatarUrl = createProfileDTO.AvatarUrl,
-                UserId = createProfileDTO.UserId,
+                Id = createProfileDTO.Id
             };
 
             newProfile = await _profileRepository.CreateAsync(newProfile);
-            return ServiceResponse<Profiles?>.Success(newProfile, 201);
+
+            ProfileDTO profileDTO = _mapper.Map(newProfile);
+
+            return ServiceResponse<ProfileDTO?>.Success(profileDTO, 201);
         }
 
-        public async Task<ServiceResponse<Profiles?>> UpdateAsync(Guid id, UpdateProfileDTO updateProfileDTO)
+        public async Task<ServiceResponse<ProfileDTO?>> UpdateAsync(Guid profileId, Guid userId, UpdateProfileDTO updateProfileDTO)
         {
-            Profiles? profile = await _profileRepository.GetByIdAsync(updateProfileDTO.Id);
+            Profile? profile = await _profileRepository.GetByIdAsync(profileId);
 
             if (profile == null)
-                return ServiceResponse<Profiles?>.Fail(default, 404, "Profile doesn't exist.");
+                return ServiceResponse<ProfileDTO?>.Fail(default, 404, "Profile doesn't exist.");
 
-            if (profile.UserId != id)
-                return ServiceResponse<Profiles?>.Fail(default, 403, "You cannot update another user's profile.");
+            if (userId != profileId)
+                return ServiceResponse<ProfileDTO?>.Fail(default, 403, "You cannot update another user's profile.");
 
-            Profiles newProfile = new Profiles
+            Profile newProfile = new Profile
             {
-                Id = updateProfileDTO.Id,
+                Id = profileId,
                 Name = updateProfileDTO.Name,
                 Description = updateProfileDTO.Description,
                 AvatarUrl = updateProfileDTO.AvatarUrl,
                 CreatedAt = profile.CreatedAt,
                 UpdatedAt = DateTime.UtcNow,
-                UserId = profile.UserId,
             };
 
             profile = await _profileRepository.UpdateAsync(newProfile);
-            return ServiceResponse<Profiles?>.Success(profile);
-        }
 
-        public async Task<ServiceResponse<Profiles?>> DeleteAsync(Guid id)
-        {
-            Profiles? profile = await _profileRepository.DeleteAsync(id);
-            return ServiceResponse<Profiles?>.Success(profile);
+            ProfileDTO profileDTO = _mapper.Map(profile);
+
+            return ServiceResponse<ProfileDTO?>.Success(profileDTO);
         }
     }
 }
