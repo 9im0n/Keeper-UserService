@@ -4,16 +4,13 @@ namespace Keeper_UserService.Models.DTO
 {
     public class UpdateProfileDTO
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [Required]
-        public string Name { get; set; } = "New User";
+        public string Name { get; set; } = null!;
 
         [MaxLength(1000)]
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; } = null!;
 
         [Url]
-        public string AvatarUrl { get; set; } = string.Empty;
+        public string AvatarUrl { get; set; } = null!;
     }
 }
