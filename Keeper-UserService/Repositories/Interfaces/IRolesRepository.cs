@@ -2,8 +2,8 @@
 
 namespace Keeper_UserService.Repositories.Interfaces
 {
-    public interface IRolesRepository : IBaseRepository<Roles>
+    public interface IRolesRepository : IBaseRepository<Role>
     {
-        public Task<Roles?> GetByNameAsync(string name);
+        public Task<Role?> GetByNameAsync(string name);
     }
 }

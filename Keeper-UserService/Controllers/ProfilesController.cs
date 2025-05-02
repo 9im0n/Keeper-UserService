@@ -1,13 +1,16 @@
 ﻿using Keeper_ApiGateWay.Models.Services;
+using Keeper_UserService.Models.Db;
 using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Keeper_UserService.Controllers
 {
+    [ApiController]
     [Route("profiles")]
-    public class ProfilesController : Controller
+    public class ProfilesController : ControllerBase
     {
         private readonly IProfileService _profileService;
 
@@ -16,45 +19,39 @@ namespace Keeper_UserService.Controllers
             _profileService = profileService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetProfiles([FromQuery] PagedRequestDTO<ProfileFilterDTO> pagedRequestDTO)
+        {
+            ServiceResponse<PagedResultDTO<ProfileDTO>> response = await _profileService.GetProfilesPagedAsync(pagedRequestDTO);
+            return HandleServiceResponse(response);
+        }
 
         [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetProfileById(Guid id)
         {
-            try
-            {
-                ServiceResponse<Profiles?> response = await _profileService.GetByIdAsync(id);
-
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
-
-                return Ok(new { data = response.Data, message = $"User Service: {response.Message}" });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: $"User Service: {ex.Message}. {ex.StackTrace}");
-            }
+            ServiceResponse<ProfileDTO?> response = await _profileService.GetByIdAsync(id);
+            return HandleServiceResponse(response);
         }
 
         [Authorize]
-        [HttpPut("{id:Guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProfileDTO updateProfileDTO)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileDTO updateProfileDTO)
         {
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState);
+            string? userIdString = User.FindFirst("UserId")?.Value;
+            if (userIdString == null || !Guid.TryParse(userIdString, out var userId))
+                return Unauthorized(new { message = "Invalid token: user ID missing or malformed." });
 
-            try
-            {
-                ServiceResponse<Profiles?> response = await _profileService.UpdateAsync(new Guid(User.FindFirst("UserId")?.Value), updateProfileDTO);
+            ServiceResponse<ProfileDTO?> response = await _profileService.UpdateAsync(id, userId, updateProfileDTO);
+            return HandleServiceResponse(response);
+        }
 
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
-                return Ok(new { data = response.Data, message = $"User Service: {response.Message}" });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: $"User Service: {ex.Message}. {ex.StackTrace}");
-            }
+        private IActionResult HandleServiceResponse<T>(ServiceResponse<T> response)
+        {
+            if (!response.IsSuccess)
+                return StatusCode(response.Status, new { message = response.Message });
+
+            return Ok(new { data = response.Data, message = response.Message });
         }
     }
 }
