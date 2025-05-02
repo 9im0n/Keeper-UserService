@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Keeper_UserService.Models.Db;
+using Keeper_UserService.Middelwares;
 
 namespace Keeper_UserService
 {
@@ -24,7 +26,6 @@ namespace Keeper_UserService
             builder.Services.AddSwaggerGen();
 
             // Configuration
-            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailService"));
 
             // Auth
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -51,20 +52,22 @@ namespace Keeper_UserService
             builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connection));
 
             // Repos
+            builder.Services.AddScoped<IBaseRepository<Permission>, BaseRepository<Permission>>();
             builder.Services.AddScoped<IRolesRepository, RolesRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IActivationPasswordsRepository, ActivationPasswordsRepository>();
             builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 
             // Services
+            builder.Services.AddScoped<IPermissionsService, PermissionService>();
             builder.Services.AddScoped<IRolesService, RolesService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IActivationPasswordService, ActivationPasswordsService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IDTOMapper, DTOMapper>();
 
 
             var app = builder.Build();
+
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

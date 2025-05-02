@@ -2,7 +2,7 @@
 
 namespace Keeper_UserService.Repositories.Interfaces
 {
-    public interface IBaseRepository<T> where T : class
+    public interface IBaseRepository<T> where T : BaseModel
     {
         public Task<List<T>> GetAllAsync();
         public Task<T?> GetByIdAsync(Guid id);

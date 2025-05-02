@@ -6,6 +6,8 @@ namespace Keeper_UserService.Models.DTO
 {
     public class CreateProfileDTO
     {
+        public Guid Id { get; set; }
+
         [Required]
         public string Name { get; set; } = "New User";
 
@@ -14,7 +16,5 @@ namespace Keeper_UserService.Models.DTO
 
         [Url]
         public string AvatarUrl { get; set; } = string.Empty;
-
-        public Guid UserId { get; set; }
     }
 }
