@@ -37,7 +37,7 @@ namespace Keeper_UserService.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateProfile(Guid id, [FromBody] UpdateProfileDTO updateProfileDTO)
         {
-            string? userIdString = User.FindFirst("UserId")?.Value;
+            string? userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userIdString == null || !Guid.TryParse(userIdString, out var userId))
                 return Unauthorized(new { message = "Invalid token: user ID missing or malformed." });
 

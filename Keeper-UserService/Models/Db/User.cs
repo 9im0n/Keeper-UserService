@@ -22,7 +22,7 @@ namespace Keeper_UserService.Models.Db
         public Profile? Profile { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<UserPermissionDeny> DeniedPermissions { get; set; } = new List<UserPermissionDeny>();
     }

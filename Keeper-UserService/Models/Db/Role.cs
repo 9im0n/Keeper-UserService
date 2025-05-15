@@ -10,7 +10,9 @@ namespace Keeper_UserService.Models.Db
         [Required]
         public string Name { get; set; } = null!;
 
+
         public ICollection<Permission> Permissions { get; set; } = new List<Permission>();
+        [JsonIgnore]
         public ICollection<User> Users { get; set; } = new List<User>();
     }
 }

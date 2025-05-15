@@ -1,5 +1,11 @@
-@Keeper_UserService_HostAddress = http://localhost:5034
-
-
+@api = http://localhost:5002
 
 ###
+
+GET {{api}}/users
+Accept: application/json
+
+###
+
+GET {{api}}/users/6dd0bc0d-dfe1-4be0-90c1-066496ca1878
+Accept: application/json
