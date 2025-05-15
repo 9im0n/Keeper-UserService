@@ -32,6 +32,9 @@ namespace Keeper_UserService.Repositories.Implementations
         {
             IQueryable<User> query = _appDbContext.Users.AsQueryable();
 
+            query = query.Include(u => u.Role).ThenInclude(r => r.Permissions).Include(u => u.DeniedPermissions)
+                .Include(u => u.Profile);
+
             if (!string.IsNullOrEmpty(request.Filter?.Email))
                 query = query.Where(u => u.Email.Contains(request.Filter.Email));
 

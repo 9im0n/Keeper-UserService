@@ -60,23 +60,35 @@ namespace Keeper_UserService.Services.Implementations
             return ServiceResponse<UserDTO>.Success(userDTO);
         }
 
+        public async Task<ServiceResponse<User?>> GetFullUserByEmailAsync(string email)
+        {
+            User? user = await _userRepository.GetByEmailAsync(email);
+
+            if (user == null)
+                return ServiceResponse<User>.Fail(null, 404, "User with this email doesn't exist");
+
+            return ServiceResponse<User>.Success(user);
+        }
+
 
         public async Task<ServiceResponse<UserDTO?>> CreateAsync(CreateUserDTO newUser)
         {
             User? oldUser = await _userRepository.GetByEmailAsync(newUser.Email);
 
             if (oldUser != null)
-                return ServiceResponse<UserDTO>.Fail(default, 409, "User with this email is already exists.");
+                return ServiceResponse<UserDTO?>.Fail(default, 409, "User with this email is already exists.");
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password, workFactor: 12);
-            var role = await _rolesService.GetUserRoleAsync();
+            ServiceResponse<RoleDTO?> roleResponse = await _rolesService.GetUserRoleAsync();
+
+            if (!roleResponse.IsSuccess)
+                return ServiceResponse<UserDTO?>.Fail(default, 404, "Role doesn't exist.");
 
             User user = new User()
             {
                 Id = Guid.NewGuid(),
                 Email = newUser.Email,
-                Password = hashedPassword,
-                RoleId = role.Data.Id,
+                Password = newUser.Password,
+                RoleId = roleResponse.Data.Id,
             };
 
             User User = await _userRepository.CreateAsync(user);

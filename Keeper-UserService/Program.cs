@@ -3,12 +3,12 @@ using Keeper_UserService.Repositories.Implementations;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Implementations;
 using Keeper_UserService.Services.Interfaces;
+using Keeper_UserService.Models.Db;
+using Keeper_UserService.Middelwares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Keeper_UserService.Models.Db;
-using Keeper_UserService.Middelwares;
 
 namespace Keeper_UserService
 {

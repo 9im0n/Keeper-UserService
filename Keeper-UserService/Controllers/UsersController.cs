@@ -25,12 +25,14 @@ namespace Keeper_UserService.Controllers
             return HandleServiceResponse(response);
         }
 
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
             ServiceResponse<UserDTO?> response = await _userService.GetByIdAsync(id);
             return HandleServiceResponse(response);
         }
+
 
         [HttpGet("by-email/{email}")]
         public async Task<IActionResult> GetUserByEmail(string email)
@@ -39,12 +41,22 @@ namespace Keeper_UserService.Controllers
             return HandleServiceResponse(response);
         }
 
+
+        [HttpGet("by-email/{email}/full")]
+        public async Task<IActionResult> GetFullUserByEmail(string email)
+        {
+            ServiceResponse<User?> response = await _userService.GetFullUserByEmailAsync(email);
+            return HandleServiceResponse(response);
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO createUserDTO)
         {
             ServiceResponse<UserDTO?> response = await _userService.CreateAsync(createUserDTO);
             return HandleServiceResponse(response);
         }
+
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDTO updateUserDTO)
