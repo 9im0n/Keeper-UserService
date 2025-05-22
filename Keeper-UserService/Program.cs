@@ -41,7 +41,7 @@ namespace Keeper_UserService
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
-                            builder.Configuration.GetSection("JwtSettings:IssuerSigningKey").Value
+                            builder.Configuration.GetSection("JwtSettings:IssuerSigningKey").Value!
                             )),
                         ValidAlgorithms = new string[] { SecurityAlgorithms.HmacSha256 },
                     };
