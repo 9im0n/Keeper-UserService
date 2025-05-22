@@ -20,7 +20,7 @@ namespace Keeper_UserService.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProfiles([FromQuery] PagedRequestDTO<ProfileFilterDTO> pagedRequestDTO)
+        public async Task<IActionResult> GetPagedProfiles([FromQuery] PagedRequestDTO<ProfileFilterDTO> pagedRequestDTO)
         {
             ServiceResponse<PagedResultDTO<ProfileDTO>> response = await _profileService.GetProfilesPagedAsync(pagedRequestDTO);
             return HandleServiceResponse(response);
@@ -32,6 +32,15 @@ namespace Keeper_UserService.Controllers
             ServiceResponse<ProfileDTO?> response = await _profileService.GetByIdAsync(id);
             return HandleServiceResponse(response);
         }
+
+
+        [HttpPost("batch")]
+        public async Task<IActionResult> GetBatchedProfiles([FromBody] BatchedProfilesQueryDTO request)
+        {
+            ServiceResponse<ICollection<ProfileDTO>?> response = await _profileService.GetBatchedAsync(request);
+            return HandleServiceResponse(response);
+        }
+
 
         [Authorize]
         [HttpPut("{id:guid}")]

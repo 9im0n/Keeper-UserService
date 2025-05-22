@@ -17,12 +17,14 @@ namespace Keeper_UserService.Services.Implementations
             _mapper = mapper;
         }
 
+
         public async Task<ServiceResponse<PagedResultDTO<ProfileDTO>>> GetProfilesPagedAsync
             (PagedRequestDTO<ProfileFilterDTO> pagedRequestDTO)
         {
             PagedResultDTO<ProfileDTO> result = await _profileRepository.GetPagedProfilesAsync(pagedRequestDTO);
             return ServiceResponse<PagedResultDTO<ProfileDTO>>.Success(result);
         }
+
 
         public async Task<ServiceResponse<ProfileDTO?>> GetByIdAsync(Guid id)
         {
@@ -35,6 +37,20 @@ namespace Keeper_UserService.Services.Implementations
 
             return ServiceResponse<ProfileDTO?>.Success(profileDTO);
         }
+
+
+        public async Task<ServiceResponse<ICollection<ProfileDTO>?>> GetBatchedAsync(BatchedProfilesQueryDTO request)
+        {
+            if (request.profileIds == null)
+                return ServiceResponse<ICollection<ProfileDTO>?>.Fail(default, 400, "ProfileIds list cannot be empty.");
+
+            ICollection<Profile> profiles = await _profileRepository.GetBatchedAsync(request.profileIds);
+
+            ICollection<ProfileDTO> profileDTOs = _mapper.Map(profiles);
+
+            return ServiceResponse<ICollection<ProfileDTO>?>.Success(profileDTOs);
+        }
+
 
         public async Task<ServiceResponse<ProfileDTO?>> CreateAsync(CreateProfileDTO createProfileDTO)
         {
@@ -57,6 +73,7 @@ namespace Keeper_UserService.Services.Implementations
 
             return ServiceResponse<ProfileDTO?>.Success(profileDTO, 201);
         }
+
 
         public async Task<ServiceResponse<ProfileDTO?>> UpdateAsync(Guid profileId, Guid userId, UpdateProfileDTO updateProfileDTO)
         {
