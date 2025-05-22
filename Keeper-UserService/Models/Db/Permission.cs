@@ -8,9 +8,6 @@ namespace Keeper_UserService.Models.Db
     [Table("Permissions")]
     public class Permission : BaseModel
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [Required]
         [MaxLength(100)]
         public string Name { get; set; } = null!;
