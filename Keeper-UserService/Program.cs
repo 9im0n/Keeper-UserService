@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Keeper_UserService.Models.Services;
+using CloudinaryDotNet;
+using Microsoft.Extensions.Options;
 
 namespace Keeper_UserService
 {
@@ -26,6 +29,14 @@ namespace Keeper_UserService
             builder.Services.AddSwaggerGen();
 
             // Configuration
+
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+            builder.Services.AddSingleton(provider =>
+            {
+                CloudinarySettings config = provider.GetRequiredService<IOptions<CloudinarySettings>>().Value;
+                Account account = new Account(config.CloudName, config.ApiKey, config.ApiSecret);
+                return new Cloudinary(account);
+            });
 
             // Auth
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -63,6 +74,7 @@ namespace Keeper_UserService
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProfileService, ProfileService>();
             builder.Services.AddScoped<IDTOMapper, DTOMapper>();
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
             var app = builder.Build();
