@@ -35,7 +35,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Profile", b =>
@@ -64,7 +64,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Profiles");
+                    b.ToTable("Profiles", (string)null);
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Role", b =>
@@ -79,7 +79,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.User", b =>
@@ -109,7 +109,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.UserPermissionDeny", b =>
@@ -130,7 +130,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPermissionDenies");
+                    b.ToTable("UserPermissionDenies", (string)null);
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -145,7 +145,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("RolesId");
 
-                    b.ToTable("PermissionRole");
+                    b.ToTable("PermissionRole", (string)null);
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Profile", b =>

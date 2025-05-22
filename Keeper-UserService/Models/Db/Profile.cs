@@ -15,7 +15,7 @@ namespace Keeper_UserService.Models.Db
         public string Description { get; set; } = null!;
 
         [Url]
-        public string AvatarUrl { get; set; } = null!;
+        public string AvatarUrl { get; set; } = "https://res.cloudinary.com/dch8agnhf/image/upload/v1747925793/User_01_vjvhn1.png";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
