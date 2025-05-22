@@ -44,5 +44,11 @@ namespace Keeper_UserService.Repositories.Implementations
                 TotalCount = totalCount
             };
         }
+
+
+        public async Task<ICollection<Profile>> GetBatchedAsync(ICollection<Guid> Ids)
+        {
+            return await _appDbContext.Profiles.Where(p => Ids.Contains(p.Id)).ToListAsync();
+        }
     }
 }

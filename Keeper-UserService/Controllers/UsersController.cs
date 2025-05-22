@@ -19,7 +19,7 @@ namespace Keeper_UserService.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery] PagedRequestDTO<UserFilterDTO> pagedRequestDTO)
+        public async Task<IActionResult> GetPagedUsers([FromQuery] PagedRequestDTO<UserFilterDTO> pagedRequestDTO)
         {
             ServiceResponse<PagedResultDTO<UserDTO>> response = await _userService.GetPagedAsync(pagedRequestDTO);
             return HandleServiceResponse(response);

@@ -26,7 +26,7 @@ namespace Keeper_UserService.Controllers
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetPermissionsById(Guid id)
         {
-            ServiceResponse<PermissionDTO> response = await _permissionsService.GetByIdAsync(id);
+            ServiceResponse<PermissionDTO?> response = await _permissionsService.GetByIdAsync(id);
             return HandleServiceResponse(response);
         }
 
