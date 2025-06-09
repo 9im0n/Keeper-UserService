@@ -12,6 +12,7 @@ using System.Text;
 using Keeper_UserService.Models.Services;
 using CloudinaryDotNet;
 using Microsoft.Extensions.Options;
+using DotNetEnv;
 
 namespace Keeper_UserService
 {
@@ -29,6 +30,15 @@ namespace Keeper_UserService
             builder.Services.AddSwaggerGen();
 
             // Configuration
+
+            builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            if (builder.Environment.IsDevelopment())
+                builder.Configuration.AddJsonFile($"appsettings.Development.json", optional: false, reloadOnChange: true);
+            else
+                Env.Load();
+
+            builder.Configuration.AddEnvironmentVariables();
 
             builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
             builder.Services.AddSingleton(provider =>
