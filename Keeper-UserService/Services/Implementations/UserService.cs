@@ -3,6 +3,7 @@ using Keeper_UserService.Models.Db;
 using Keeper_UserService.Models.DTO;
 using Keeper_UserService.Repositories.Interfaces;
 using Keeper_UserService.Services.Interfaces;
+using BCrypt.Net;
 
 namespace Keeper_UserService.Services.Implementations
 {
@@ -10,105 +11,111 @@ namespace Keeper_UserService.Services.Implementations
     {
         private readonly IUserRepository _userRepository;
         private readonly IRolesService _rolesService;
-        private readonly IActivationPasswordService _activationPasswordService;
-        private readonly IEmailService _emailService;
+        private readonly IProfileService _profileService;
+        private readonly IDTOMapper _mapper;
 
 
-        public UserService(IUserRepository userRepository, IRolesService rolesService, 
-            IActivationPasswordService activationPasswordService, IEmailService emailService)
+        public UserService(IUserRepository userRepository, 
+                           IRolesService rolesService, 
+                           IProfileService profileService,
+                           IDTOMapper mapper)
         {
             _userRepository = userRepository;
             _rolesService = rolesService;
-            _activationPasswordService = activationPasswordService;
-            _emailService = emailService;
+            _profileService = profileService;
+            _mapper = mapper;
         }
 
 
-        public async Task<ServiceResponse<List<Users>>> GetAllAsync()
+        public async Task<ServiceResponse<PagedResultDTO<UserDTO>>> GetPagedAsync(
+            PagedRequestDTO<UserFilterDTO> pagedRequestDTO)
         {
-            List<Users> users = await _userRepository.GetAllAsync();
-            return ServiceResponse<List<Users>>.Success(users);
+            PagedResultDTO<UserDTO> result = await _userRepository.GetPagedUsersAsync(pagedRequestDTO);
+            return ServiceResponse<PagedResultDTO<UserDTO>>.Success(result);
         }
 
 
-        public async Task<ServiceResponse<Users?>> GetByIdAsync(Guid id)
+        public async Task<ServiceResponse<UserDTO?>> GetByIdAsync(Guid id)
         {
-            Users user = await _userRepository.GetByIdAsync(id);
+            User? user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
-                return ServiceResponse<Users>.Fail(null, 404, "User with this id doesn't exist");
+                return ServiceResponse<UserDTO>.Fail(null, 404, "User with this id doesn't exist");
 
+            UserDTO userDTO = _mapper.Map(user);
 
-            return ServiceResponse<Users>.Success(user);
+            return ServiceResponse<UserDTO>.Success(userDTO);
         }
 
 
-        public async Task<ServiceResponse<Users?>> GetByEmailAsync(string email)
+        public async Task<ServiceResponse<UserDTO?>> GetByEmailAsync(string email)
         {
-            Users user = await _userRepository.GetByEmailAsync(email);
+            User? user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null)
-                return ServiceResponse<Users>.Fail(null, 404, "User with this email doesn't exist");
+                return ServiceResponse<UserDTO>.Fail(null, 404, "User with this email doesn't exist");
 
-            return ServiceResponse<Users>.Success(user);
+            UserDTO userDTO = _mapper.Map(user);
+
+            return ServiceResponse<UserDTO>.Success(userDTO);
+        }
+
+        public async Task<ServiceResponse<User?>> GetFullUserByEmailAsync(string email)
+        {
+            User? user = await _userRepository.GetByEmailAsync(email);
+
+            if (user == null)
+                return ServiceResponse<User>.Fail(null, 404, "User with this email doesn't exist");
+
+            return ServiceResponse<User>.Success(user);
         }
 
 
-        public async Task<ServiceResponse<Users?>> CreateAsync(CreateUserDTO newUser)
+        public async Task<ServiceResponse<UserDTO?>> CreateAsync(CreateUserDTO newUser)
         {
-            if (newUser.Password != newUser.Confirm)
-                return ServiceResponse<Users>.Fail(default, 400, "Password and Confirm password aren't same");
-
-            Users oldUser = await _userRepository.GetByEmailAsync(newUser.Email);
+            User? oldUser = await _userRepository.GetByEmailAsync(newUser.Email);
 
             if (oldUser != null)
-                return ServiceResponse<Users>.Fail(default, 409, "User with this email is already exists.");
+                return ServiceResponse<UserDTO?>.Fail(default, 409, "User with this email is already exists.");
 
-            var role = await _rolesService.GetByNameAsync("User");
+            ServiceResponse<RoleDTO?> roleResponse = await _rolesService.GetUserRoleAsync();
 
-            Users user = new Users()
+            if (!roleResponse.IsSuccess)
+                return ServiceResponse<UserDTO?>.Fail(default, 404, "Role doesn't exist.");
+
+            User user = new User()
             {
                 Id = Guid.NewGuid(),
                 Email = newUser.Email,
                 Password = newUser.Password,
-                IsActive = false,
-                RoleId = role.Id,
-                Role = role,
-                Permissions = new List<Permissions>()
+                RoleId = roleResponse.Data.Id,
             };
 
-            Users User = await _userRepository.CreateAsync(user);
+            User User = await _userRepository.CreateAsync(user);
 
-            ServiceResponse<ActivationPasswords> password = await _activationPasswordService.CreateAsync(User);
+            CreateProfileDTO createProfileDTO = new CreateProfileDTO { Id = User.Id };
+            ServiceResponse<ProfileDTO?> profile = await _profileService.CreateAsync(createProfileDTO);
 
-            ServiceResponse<string> response = await _emailService.SendWelcomeEmailAsync(User.Email, password.Data);
+            if (!profile.IsSuccess)
+                return ServiceResponse<UserDTO>.Fail(default, profile.Status, profile.Message);
 
-            if (!response.IsSuccess)
-                return ServiceResponse<Users>.Fail(default, response.Status, response.Message);
+            UserDTO userDTO = _mapper.Map(User);
 
-            return ServiceResponse<Users>.Success(User, 201);
+            return ServiceResponse<UserDTO>.Success(userDTO, 201);
         }
 
-
-        public async Task<ServiceResponse<Users?>> ActivateUser(UserActivationDTO activation)
+        public async Task<ServiceResponse<UserDTO?>> UpdateUserAsync(Guid userId, UpdateUserDTO updateUserDTO)
         {
-            Users? user = await _userRepository.GetByEmailAsync(activation.Email);
+            User? user = await _userRepository.GetByIdAsync(userId);
 
             if (user == null)
-                return ServiceResponse<Users?>.Fail(default, 404, "User doesn't exist with this email.");
+                return ServiceResponse<UserDTO?>.Fail(default, 404, "User don't exist.");
 
-            ServiceResponse<ActivationPasswords?> password = await _activationPasswordService.GetByUserIdAsync(user.Id);
-
-            if (!password.IsSuccess)
-                return ServiceResponse<Users?>.Fail(default, 404, "Activation password doesn't exist.");
-
-            if (password.Data.Password != activation.ActivationPassword)
-                return ServiceResponse<Users?>.Fail(default, 400, "Activation passwords are not same.");
-
-            user.IsActive = true;
+            user.RoleId = updateUserDTO.RoleId;
             user = await _userRepository.UpdateAsync(user);
 
-            return ServiceResponse<Users?>.Success(user);
+            UserDTO userDTO = _mapper.Map(user);
+            return ServiceResponse<UserDTO?>.Success(userDTO);
         }
     }
 }

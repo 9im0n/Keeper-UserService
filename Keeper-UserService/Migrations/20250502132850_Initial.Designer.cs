@@ -3,6 +3,7 @@ using System;
 using Keeper_UserService.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Keeper_UserService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250502132850_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,7 +38,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions", (string)null);
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Profile", b =>
@@ -64,7 +67,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Profiles", (string)null);
+                    b.ToTable("Profiles");
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Role", b =>
@@ -79,7 +82,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.User", b =>
@@ -109,7 +112,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.UserPermissionDeny", b =>
@@ -130,7 +133,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserPermissionDenies", (string)null);
+                    b.ToTable("UserPermissionDenies");
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -145,7 +148,7 @@ namespace Keeper_UserService.Migrations
 
                     b.HasIndex("RolesId");
 
-                    b.ToTable("PermissionRole", (string)null);
+                    b.ToTable("PermissionRole");
                 });
 
             modelBuilder.Entity("Keeper_UserService.Models.Db.Profile", b =>

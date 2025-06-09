@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Keeper_UserService.Controllers
 {
+    [ApiController]
     [Route("users")]
-    public class UsersController : Controller
+    public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
 
@@ -16,98 +17,60 @@ namespace Keeper_UserService.Controllers
             _userService = userService;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetPagedUsers([FromQuery] PagedRequestDTO<UserFilterDTO> pagedRequestDTO)
         {
-            try
-            {
-                ServiceResponse<List<Users>> response = await _userService.GetAllAsync();
-
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
-
-                return Ok(new { data = response.Data, message = response.Message });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: ex.Message);
-            }
+            ServiceResponse<PagedResultDTO<UserDTO>> response = await _userService.GetPagedAsync(pagedRequestDTO);
+            return HandleServiceResponse(response);
         }
 
 
-        [HttpGet("{id:Guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetUserById(Guid id)
         {
-            try
-            {
-                ServiceResponse<Users> response = await _userService.GetByIdAsync(id);
-
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
-
-                return Ok(new { data = response.Data, message = response.Message });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: ex.Message);
-            }
+            ServiceResponse<UserDTO?> response = await _userService.GetByIdAsync(id);
+            return HandleServiceResponse(response);
         }
 
 
-        [HttpGet("{email}")]
-        public async Task<IActionResult> GetByEmail(string email)
+        [HttpGet("by-email/{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
         {
-            try
-            {
-                ServiceResponse<Users> response = await _userService.GetByEmailAsync(email);
-
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = response.Message });
-
-                return Ok(new { data = response.Data, message = response.Message });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: ex.Message);
-            }
+            ServiceResponse<UserDTO?> response = await _userService.GetByEmailAsync(email);
+            return HandleServiceResponse(response);
         }
 
 
-        [HttpPost("registration")]
-        public async Task<IActionResult> Registration([FromBody] CreateUserDTO newUser)
+        [HttpGet("by-email/{email}/full")]
+        public async Task<IActionResult> GetFullUserByEmail(string email)
         {
-            try
-            {
-                ServiceResponse<Users> userServiceResponse = await _userService.CreateAsync(newUser);
-
-                if (!userServiceResponse.IsSuccess)
-                    return StatusCode(statusCode: userServiceResponse.Status, new { message = userServiceResponse.Message });
-
-                return StatusCode(statusCode: 201, new { data = userServiceResponse.Data, message = "User was created." });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: $"User service: {ex.Message}");
-            }
+            ServiceResponse<User?> response = await _userService.GetFullUserByEmailAsync(email);
+            return HandleServiceResponse(response);
         }
 
 
-        [HttpPost("activate")]
-        public async Task<IActionResult> UserActivation([FromBody] UserActivationDTO activation)
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDTO createUserDTO)
         {
-            try
-            {
-                ServiceResponse<Users?> response = await _userService.ActivateUser(activation);
+            ServiceResponse<UserDTO?> response = await _userService.CreateAsync(createUserDTO);
+            return HandleServiceResponse(response);
+        }
 
-                if (!response.IsSuccess)
-                    return StatusCode(statusCode: response.Status, new { message = $"User Service: {response.Message}" });
 
-                return Ok(new { data = response.Data, message = response.Message });
-            }
-            catch (Exception ex)
-            {
-                return Problem(statusCode: 500, detail: $"User Service: {ex.Message}");
-            }
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDTO updateUserDTO)
+        {
+            ServiceResponse<UserDTO?> response = await _userService.UpdateUserAsync(id, updateUserDTO);
+            return HandleServiceResponse(response);
+        }
+
+        private IActionResult HandleServiceResponse<T>(ServiceResponse<T> response)
+        {
+            if (!response.IsSuccess)
+                return StatusCode(response.Status, new { message = response.Message });
+
+            return Ok(new { data = response.Data, message = response.Message });
         }
     }
 }
