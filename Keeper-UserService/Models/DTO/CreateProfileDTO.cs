@@ -13,8 +13,5 @@ namespace Keeper_UserService.Models.DTO
 
         [MaxLength(1000)]
         public string Description { get; set; } = string.Empty;
-
-        [Url]
-        public string AvatarUrl { get; set; } = string.Empty;
     }
 }
