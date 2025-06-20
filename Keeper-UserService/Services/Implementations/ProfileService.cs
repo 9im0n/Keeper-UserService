@@ -68,7 +68,6 @@ namespace Keeper_UserService.Services.Implementations
             {
                 Name = createProfileDTO.Name,
                 Description = createProfileDTO.Description,
-                AvatarUrl = createProfileDTO.AvatarUrl,
                 Id = createProfileDTO.Id
             };
 
@@ -90,16 +89,11 @@ namespace Keeper_UserService.Services.Implementations
             if (userId != profileId)
                 return ServiceResponse<ProfileDTO?>.Fail(default, 403, "You cannot update another user's profile.");
 
-            Profile newProfile = new Profile
-            {
-                Id = profileId,
-                Name = updateProfileDTO.Name,
-                Description = updateProfileDTO.Description,
-                CreatedAt = profile.CreatedAt,
-                UpdatedAt = DateTime.UtcNow,
-            };
+            profile.Name = updateProfileDTO.Name;
+            profile.Description = updateProfileDTO.Description;
+            profile.UpdatedAt = DateTime.UtcNow;
 
-            profile = await _profileRepository.UpdateAsync(newProfile);
+            profile = await _profileRepository.UpdateAsync(profile);
 
             ProfileDTO profileDTO = _mapper.Map(profile!);
 
