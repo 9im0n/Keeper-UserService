@@ -59,7 +59,7 @@ namespace Keeper_UserService.Controllers
         [HttpPut("{id:guid}/upload-image")]
         public async Task<IActionResult> UploadAvatarImage(Guid id, [FromForm] UploadAvatarDTO uploadAvatarDTO)
         {
-            ServiceResponse<ProfileDTO?> response = await _profileService.UploadAvatarAsync(uploadAvatarDTO, User);
+            ServiceResponse<ProfileDTO?> response = await _profileService.UploadAvatarAsync(uploadAvatarDTO, id, User);
             return HandleServiceResponse(response);
         }
 
